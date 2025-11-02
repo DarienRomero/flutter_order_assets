@@ -10,6 +10,7 @@ class FlutterOrderAssets {
   static Future<void> start(List<String> arguments) async {
     final assetsDir = Directory('assets');
     final pubspec = File('pubspec.yaml');
+    final libDir = Directory('lib');
 
     if (!assetsDir.existsSync()) {
       throw Exception('Carpeta assets/ no encontrada.');
@@ -18,25 +19,26 @@ class FlutterOrderAssets {
     if (!pubspec.existsSync()) {
       throw Exception('Archivo pubspec no encontrado.');
     }
+    
+    if (!libDir.existsSync()) {
+      throw Exception('Carpeta lib/ no encontrada.');
+    }
 
     print('📁 Ordenando assets...');
     final sorter = AssetSorter(assetsDir);
-    final movedFiles = await sorter.sort();
+    
+    final movedPaths = await sorter.sort();
+
+    print('📁 Archivos movidos...');
+    print(movedPaths);
 
     print('🧾 Actualizando pubspec.yaml...');
     final updater = PubspecUpdater(pubspec);
     updater.updateAssets();
 
-    // // Map de rutas viejas a nuevas para actualizar referencias
-    // final movedPaths = <String, String>{};
-    // for (final file in movedFiles) {
-    //   final old = file.path.split('/').takeWhile((e) => e != 'assets').join('/');
-    //   movedPaths[old] = file.path;
-    // }
-
-    // print('🔗 Actualizando referencias en /lib...');
-    // final refUpdater = ReferenceUpdater();
-    // refUpdater.updateReferences(movedPaths);
+    print('🔗 Actualizando referencias en /lib...');
+    final refUpdater = ReferenceUpdater();
+    refUpdater.updateReferences(movedPaths);
 
     print('✅ Proceso completado.');
   }

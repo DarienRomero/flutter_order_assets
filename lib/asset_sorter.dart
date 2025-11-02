@@ -21,9 +21,9 @@ class AssetSorter {
     'misc': [],
   };
 
-  Future<List<FileSystemEntity>> sort() async {
+  Future<Map<String, String>> sort() async {
     // --- 1️⃣ Mover archivos según la extensión ---
-    final movedFiles = <FileSystemEntity>[];
+    final movedPaths = <String, String>{};
     for (final entity in assetsDir.listSync(recursive: true)) {
       if (entity is! File) continue;
 
@@ -39,8 +39,9 @@ class AssetSorter {
 
       final newPath = path.join(newDir.path, path.basename(entity.path));
       if (entity.path != newPath) {
+        final oldPath = entity.path;
         entity.renameSync(newPath);
-        movedFiles.add(File(newPath));
+        movedPaths[oldPath] = newPath;
       }
     }
 
@@ -68,6 +69,6 @@ class AssetSorter {
       }
     }
 
-    return movedFiles;
+    return movedPaths;
   }
 }
