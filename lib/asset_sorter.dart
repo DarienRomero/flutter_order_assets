@@ -22,10 +22,6 @@ class AssetSorter {
   };
 
   Future<List<FileSystemEntity>> sort() async {
-    if (!assetsDir.existsSync()) {
-      throw Exception('Carpeta assets/ no encontrada.');
-    }
-
     // --- 1️⃣ Mover archivos según la extensión ---
     final movedFiles = <FileSystemEntity>[];
     for (final entity in assetsDir.listSync(recursive: true)) {

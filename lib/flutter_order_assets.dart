@@ -8,13 +8,24 @@ import 'package:flutter_order_assets/reference_updater.dart';
 
 class FlutterOrderAssets {
   static Future<void> start(List<String> arguments) async {
-    print("Everything ok");
     final assetsDir = Directory('assets');
-    // final pubspec = File('pubspec.yaml');
+    final pubspec = File('pubspec.yaml');
+
+    if (!assetsDir.existsSync()) {
+      throw Exception('Carpeta assets/ no encontrada.');
+    }
+
+    if (!pubspec.existsSync()) {
+      throw Exception('Archivo pubspec no encontrado.');
+    }
 
     print('📁 Ordenando assets...');
     final sorter = AssetSorter(assetsDir);
     final movedFiles = await sorter.sort();
+
+    print('🧾 Actualizando pubspec.yaml...');
+    final updater = PubspecUpdater(pubspec);
+    updater.updateAssets();
 
     // // Map de rutas viejas a nuevas para actualizar referencias
     // final movedPaths = <String, String>{};
@@ -22,10 +33,6 @@ class FlutterOrderAssets {
     //   final old = file.path.split('/').takeWhile((e) => e != 'assets').join('/');
     //   movedPaths[old] = file.path;
     // }
-
-    // print('🧾 Actualizando pubspec.yaml...');
-    // final updater = PubspecUpdater(pubspec);
-    // updater.updateAssets();
 
     // print('🔗 Actualizando referencias en /lib...');
     // final refUpdater = ReferenceUpdater();

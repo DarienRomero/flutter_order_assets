@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
-import 'package:path/path.dart' as p;
 
 class PubspecUpdater {
   final File pubspecFile;
@@ -14,14 +13,13 @@ class PubspecUpdater {
     final editor = YamlEditor(content);
 
     final assetsDir = Directory('assets');
-    if (!assetsDir.existsSync()) return;
 
     final allAssets = assetsDir
         .listSync(recursive: true)
-        .whereType<File>()
-        .map((f) => p.relative(f.path))
+        .whereType<Directory>()
+        .map((f) => "${f.path}/")
         .toList()
-      ..sort();
+        ..sort();
 
     if (yaml['flutter'] == null) {
       editor.update(['flutter'], {'assets': allAssets});
