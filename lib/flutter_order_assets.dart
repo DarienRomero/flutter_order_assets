@@ -24,19 +24,16 @@ class FlutterOrderAssets {
       throw Exception('Carpeta lib/ no encontrada.');
     }
 
-    print('📁 Ordenando assets...');
     final sorter = AssetSorter(assetsDir);
     
     final movedPaths = await sorter.sort();
 
-    print('🧾 Actualizando pubspec.yaml...');
     final updater = PubspecUpdater(pubspec);
     updater.updateAssets();
 
-    print('🔗 Actualizando referencias en /lib...');
     final refUpdater = ReferenceUpdater();
     refUpdater.updateReferences(movedPaths);
 
-    print('✅ Proceso completado.');
+    print('✅ Proceso completed.');
   }
 }

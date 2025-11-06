@@ -22,7 +22,6 @@ class AssetSorter {
   };
 
   Future<Map<String, String>> sort() async {
-    // --- 1️⃣ Mover archivos según la extensión ---
     final movedPaths = <String, String>{};
     for (final entity in assetsDir.listSync(recursive: true)) {
       if (entity is! File) continue;
@@ -46,7 +45,6 @@ class AssetSorter {
     }
 
 
-    // --- 2️⃣ Eliminar carpetas que no son de primer nivel válidas ---
     final validFolders = _groups.keys.toSet();
 
     for (final entity in assetsDir.listSync()) {
@@ -56,13 +54,11 @@ class AssetSorter {
         // Si no está en las carpetas válidas → eliminarla
         if (!validFolders.contains(folderName)) {
           entity.deleteSync(recursive: true);
-          print('🗑️ Carpeta eliminada: $folderName');
         } else {
           // Si es válida, borrar subcarpetas dentro de ella
           for (final sub in entity.listSync()) {
             if (sub is Directory) {
               sub.deleteSync(recursive: true);
-              print('🧹 Subcarpeta eliminada: ${sub.path}');
             }
           }
         }
