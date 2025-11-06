@@ -39,9 +39,9 @@ class AssetSorter {
 
       final newPath = path.join(newDir.path, path.basename(entity.path));
       if (entity.path != newPath) {
-        final oldPath = entity.path;
+        final oldPath = entity.path.replaceAll('\\', '/');
         entity.renameSync(newPath);
-        movedPaths[oldPath] = newPath;
+        movedPaths[oldPath] = newPath.replaceAll('\\', '/');
       }
     }
 

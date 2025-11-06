@@ -29,9 +29,6 @@ class FlutterOrderAssets {
     
     final movedPaths = await sorter.sort();
 
-    print('📁 Archivos movidos...');
-    print(movedPaths);
-
     print('🧾 Actualizando pubspec.yaml...');
     final updater = PubspecUpdater(pubspec);
     updater.updateAssets();

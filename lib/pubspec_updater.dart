@@ -17,10 +17,12 @@ class PubspecUpdater {
     final allAssets = assetsDir
         .listSync(recursive: true)
         .whereType<Directory>()
-        .map((f) => "${f.path}/")
+        .map((f) => "${f.path.replaceAll('\\', '/')}/")
         .toList()
         ..sort();
 
+    print("allAssets");
+    print(allAssets);
     if (yaml['flutter'] == null) {
       editor.update(['flutter'], {'assets': allAssets});
     } else if (yaml['flutter']['assets'] != null) {

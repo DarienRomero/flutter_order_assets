@@ -13,6 +13,7 @@ class ReferenceUpdater {
 
       movedPaths.forEach((old, newPath) {
         if (content.contains(old)) {
+          print(file.path);
           content = content.replaceAll(old, newPath);
           changed = true;
         }
@@ -20,7 +21,6 @@ class ReferenceUpdater {
 
       if (changed) {
         file.writeAsStringSync(content);
-        print('🔄 Actualizado: ${p.relative(file.path)}');
       }
     }
   }
