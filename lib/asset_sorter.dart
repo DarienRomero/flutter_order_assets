@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
+/// Esta clase se encarga de organizar los activos en el directorio de assets.
+/// Clasifica los archivos por extensión en carpetas predefinidas (como imágenes, iconos, etc.),
+/// mueve los archivos a sus respectivas carpetas y limpia directorios no válidos o subcarpetas innecesarias.
 class AssetSorter {
   final Directory assetsDir;
 

@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
+/// Esta clase se encarga de actualizar la sección de assets en el archivo pubspec.yaml.
+/// Escanea el directorio 'assets' de forma recursiva para recopilar todas las carpetas de activos,
+/// y actualiza el pubspec.yaml para incluir estas rutas en la configuración de Flutter.
 class PubspecUpdater {
   final File pubspecFile;
 
