@@ -177,4 +177,194 @@ flutter:
       Directory.current = originalDir;
     }
   });
+
+  test('updateFonts: caso de éxito - actualiza referencias cuando archivos están en assets/fonts/', () {
+    // Crear estructura de directorios
+    final assetsDir = Directory('${tempDir.path}/assets');
+    assetsDir.createSync(recursive: true);
+    final fontsDir = Directory('${assetsDir.path}/fonts');
+    fontsDir.createSync(recursive: true);
+
+    // Crear archivos de fuentes en assets/fonts/
+    File('${fontsDir.path}/ClanOT-Black.otf').writeAsStringSync('dummy');
+    File('${fontsDir.path}/ClanOT-Bold.otf').writeAsStringSync('dummy');
+    File('${fontsDir.path}/Roboto-Regular.ttf').writeAsStringSync('dummy');
+
+    // Crear pubspec.yaml con fuentes que apuntan a rutas antiguas
+    final initialPubspec = '''
+name: test_app
+version: 1.0.0
+
+flutter:
+  assets:
+    - assets/fonts/
+  fonts:
+    - family: Clan
+      fonts:
+        - asset: assets/fuentes/CCC/ClanOT-Black.otf
+        - asset: assets/fuentes/CCC/ClanOT-Bold.otf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/old/Roboto-Regular.ttf
+''';
+
+    pubspecFile.writeAsStringSync(initialPubspec);
+
+    final originalDir = Directory.current;
+    Directory.current = tempDir;
+
+    try {
+      final updater = PubspecUpdater(File('pubspec.yaml'));
+      updater.updateAssets();
+
+      // Leer el pubspec actualizado
+      final updatedContent = pubspecFile.readAsStringSync();
+      final updatedYaml = loadYaml(updatedContent);
+      final fontsList = updatedYaml['flutter']['fonts'] as List;
+
+      // Verificar que las rutas se actualizaron correctamente
+      final clanFamily = fontsList[0] as Map;
+      final clanFonts = clanFamily['fonts'] as List;
+      expect(clanFonts[0]['asset'].toString(), equals('assets/fonts/ClanOT-Black.otf'));
+      expect(clanFonts[1]['asset'].toString(), equals('assets/fonts/ClanOT-Bold.otf'));
+
+      final robotoFamily = fontsList[1] as Map;
+      final robotoFonts = robotoFamily['fonts'] as List;
+      expect(robotoFonts[0]['asset'].toString(), equals('assets/fonts/Roboto-Regular.ttf'));
+    } finally {
+      Directory.current = originalDir;
+    }
+  });
+
+  test('updateFonts: más archivos que declaraciones - solo actualiza los que coinciden', () {
+    // Crear estructura de directorios
+    final assetsDir = Directory('${tempDir.path}/assets');
+    assetsDir.createSync(recursive: true);
+    final fontsDir = Directory('${assetsDir.path}/fonts');
+    fontsDir.createSync(recursive: true);
+
+    // Crear más archivos de fuentes de los que están declarados
+    File('${fontsDir.path}/ClanOT-Black.otf').writeAsStringSync('dummy');
+    File('${fontsDir.path}/ClanOT-Bold.otf').writeAsStringSync('dummy');
+    File('${fontsDir.path}/ClanOT-Light.otf').writeAsStringSync('dummy'); // No declarado
+    File('${fontsDir.path}/Roboto-Regular.ttf').writeAsStringSync('dummy');
+    File('${fontsDir.path}/Roboto-Bold.ttf').writeAsStringSync('dummy'); // No declarado
+
+    // Crear pubspec.yaml con solo algunas fuentes declaradas
+    final initialPubspec = '''
+name: test_app
+version: 1.0.0
+
+flutter:
+  assets:
+    - assets/fonts/
+  fonts:
+    - family: Clan
+      fonts:
+        - asset: assets/fuentes/CCC/ClanOT-Black.otf
+        - asset: assets/fuentes/CCC/ClanOT-Bold.otf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/old/Roboto-Regular.ttf
+''';
+
+    pubspecFile.writeAsStringSync(initialPubspec);
+
+    final originalDir = Directory.current;
+    Directory.current = tempDir;
+
+    try {
+      final updater = PubspecUpdater(File('pubspec.yaml'));
+      updater.updateAssets();
+
+      // Leer el pubspec actualizado
+      final updatedContent = pubspecFile.readAsStringSync();
+      final updatedYaml = loadYaml(updatedContent);
+      final fontsList = updatedYaml['flutter']['fonts'] as List;
+
+      // Verificar que solo se actualizaron las fuentes declaradas
+      final clanFamily = fontsList[0] as Map;
+      final clanFonts = clanFamily['fonts'] as List;
+      expect(clanFonts.length, equals(2)); // Solo 2 declaradas
+      expect(clanFonts[0]['asset'].toString(), equals('assets/fonts/ClanOT-Black.otf'));
+      expect(clanFonts[1]['asset'].toString(), equals('assets/fonts/ClanOT-Bold.otf'));
+
+      final robotoFamily = fontsList[1] as Map;
+      final robotoFonts = robotoFamily['fonts'] as List;
+      expect(robotoFonts.length, equals(1)); // Solo 1 declarada
+      expect(robotoFonts[0]['asset'].toString(), equals('assets/fonts/Roboto-Regular.ttf'));
+
+      // Verificar que los archivos extra no se agregaron automáticamente
+      final clanFontAssets = clanFonts.map((f) => f['asset'].toString()).toList();
+      expect(clanFontAssets, isNot(contains('assets/fonts/ClanOT-Light.otf')));
+      
+      final robotoFontAssets = robotoFonts.map((f) => f['asset'].toString()).toList();
+      expect(robotoFontAssets, isNot(contains('assets/fonts/Roboto-Bold.ttf')));
+    } finally {
+      Directory.current = originalDir;
+    }
+  });
+
+  test('updateFonts: menos archivos que declaraciones - solo actualiza los que existen', () {
+    // Crear estructura de directorios
+    final assetsDir = Directory('${tempDir.path}/assets');
+    assetsDir.createSync(recursive: true);
+    final fontsDir = Directory('${assetsDir.path}/fonts');
+    fontsDir.createSync(recursive: true);
+
+    // Crear menos archivos de fuentes de los que están declarados
+    File('${fontsDir.path}/ClanOT-Black.otf').writeAsStringSync('dummy');
+    // ClanOT-Bold.otf NO existe en assets/fonts/
+    File('${fontsDir.path}/Roboto-Regular.ttf').writeAsStringSync('dummy');
+    // Roboto-Bold.ttf NO existe en assets/fonts/
+
+    // Crear pubspec.yaml con más fuentes declaradas de las que existen
+    final initialPubspec = '''
+name: test_app
+version: 1.0.0
+
+flutter:
+  assets:
+    - assets/fonts/
+  fonts:
+    - family: Clan
+      fonts:
+        - asset: assets/fuentes/CCC/ClanOT-Black.otf
+        - asset: assets/fuentes/CCC/ClanOT-Bold.otf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/old/Roboto-Regular.ttf
+        - asset: assets/fonts/old/Roboto-Bold.ttf
+''';
+
+    pubspecFile.writeAsStringSync(initialPubspec);
+
+    final originalDir = Directory.current;
+    Directory.current = tempDir;
+
+    try {
+      final updater = PubspecUpdater(File('pubspec.yaml'));
+      updater.updateAssets();
+
+      // Leer el pubspec actualizado
+      final updatedContent = pubspecFile.readAsStringSync();
+      final updatedYaml = loadYaml(updatedContent);
+      final fontsList = updatedYaml['flutter']['fonts'] as List;
+
+      // Verificar que solo se actualizaron las fuentes que existen
+      final clanFamily = fontsList[0] as Map;
+      final clanFonts = clanFamily['fonts'] as List;
+      expect(clanFonts.length, equals(2)); // Mantiene ambas declaraciones
+      expect(clanFonts[0]['asset'].toString(), equals('assets/fonts/ClanOT-Black.otf')); // Actualizada
+      expect(clanFonts[1]['asset'].toString(), equals('assets/fuentes/CCC/ClanOT-Bold.otf')); // No actualizada (no existe)
+
+      final robotoFamily = fontsList[1] as Map;
+      final robotoFonts = robotoFamily['fonts'] as List;
+      expect(robotoFonts.length, equals(2)); // Mantiene ambas declaraciones
+      expect(robotoFonts[0]['asset'].toString(), equals('assets/fonts/Roboto-Regular.ttf')); // Actualizada
+      expect(robotoFonts[1]['asset'].toString(), equals('assets/fonts/old/Roboto-Bold.ttf')); // No actualizada (no existe)
+    } finally {
+      Directory.current = originalDir;
+    }
+  });
 }
