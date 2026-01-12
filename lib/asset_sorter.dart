@@ -6,8 +6,9 @@ import 'package:path/path.dart' as path;
 /// mueve los archivos a sus respectivas carpetas y limpia directorios no válidos o subcarpetas innecesarias.
 class AssetSorter {
   final Directory assetsDir;
+  final bool excludeAudio;
 
-  AssetSorter(this.assetsDir);
+  AssetSorter(this.assetsDir, {this.excludeAudio = false});
 
   final Map<String, List<String>> _groups = {
     'icons': ['.svg', '.ico'],
@@ -28,6 +29,11 @@ class AssetSorter {
     final movedPaths = <String, String>{};
     for (final entity in assetsDir.listSync(recursive: true)) {
       if (entity is! File) continue;
+
+      // Si excludeAudio es true y el archivo es de audio en la raíz de assets/, no moverlo
+      if (excludeAudio && _isAudioInAssetsRoot(entity.path)) {
+        continue;
+      }
 
       final ext = path.extension(entity.path).toLowerCase();
       String targetFolder = 'misc';
@@ -69,5 +75,19 @@ class AssetSorter {
     }
 
     return movedPaths;
+  }
+
+  /// Verifica si un archivo es de audio y está directamente en assets/ (no en subdirectorios)
+  bool _isAudioInAssetsRoot(String filePath) {
+    final audioExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac'];
+    final ext = path.extension(filePath).toLowerCase();
+    
+    if (!audioExtensions.contains(ext)) return false;
+    
+    // Obtener la ruta relativa desde assetsDir
+    final relativePath = path.relative(filePath, from: assetsDir.path);
+    
+    // Si no contiene '/', está directamente en assets/
+    return !relativePath.contains(path.separator);
   }
 }
