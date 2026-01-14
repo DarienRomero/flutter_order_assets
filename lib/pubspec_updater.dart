@@ -21,7 +21,7 @@ class PubspecUpdater {
 
     // Obtener todos los directorios de assets
     final allAssets = assetsDir
-        .listSync(recursive: true)
+        .listSync(recursive: false)
         .whereType<Directory>()
         .map((f) => "${f.path.replaceAll('\\', '/')}/")
         .toList()
@@ -49,8 +49,6 @@ class PubspecUpdater {
     final finalAssets = <String>[...preservedAssets, ...allAssets]
       ..sort();
 
-    print("allAssets");
-    print(finalAssets);
     if (yaml['flutter'] == null) {
       editor.update(['flutter'], {'assets': finalAssets});
     } else if (yaml['flutter']['assets'] != null) {

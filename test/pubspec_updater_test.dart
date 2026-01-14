@@ -82,13 +82,15 @@ flutter:
     try {
       // Crear el updater con excludeAudio = true (usar ruta relativa después de cambiar directorio)
       final updater = PubspecUpdater(
-        File('pubspec.yaml'),
+        pubspecFile,
         excludeAudio: true,
       );
       updater.updateAssets();
 
       // Leer el pubspec actualizado
       final updatedContent = pubspecFile.readAsStringSync();
+      print("updatedContent");
+      print(updatedContent);
       final updatedYaml = loadYaml(updatedContent);
       final updatedAssets = (updatedYaml['flutter']['assets'] as List)
           .map((e) => e.toString())
@@ -117,11 +119,6 @@ flutter:
       // Pero si existe el directorio, debería estar
       if (Directory('${assetsDir.path}/themes').existsSync()) {
         expect(updatedAssets, contains('assets/themes/'));
-      }
-
-      print('Assets actualizados:');
-      for (final asset in updatedAssets) {
-        print('  - $asset');
       }
     } finally {
       Directory.current = originalDir;
