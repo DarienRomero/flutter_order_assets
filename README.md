@@ -74,6 +74,10 @@ The command:
 - Audio files in subdirectories will be organized normally
 - Asset references in your Dart files are automatically updated when files are moved
 
+## Limitations
+
+- Dynamic asset paths (e.g., `/assets/images/${some_value}`) are not processed. The tool only handles static asset paths and cannot update references that use string interpolation or dynamic path construction.
+
 ## Meta
 
 Darien Romero - [GitHub](https://github.com/DarienRomero)
