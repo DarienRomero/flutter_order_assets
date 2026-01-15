@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:path/path.dart' as p;
 
 /// This class is responsible for updating references to moved assets in Dart files.
 /// Recursively scans the 'lib' directory and replaces old paths with new ones
