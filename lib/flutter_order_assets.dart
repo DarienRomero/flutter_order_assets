@@ -14,18 +14,18 @@ class FlutterOrderAssets {
     final libDir = Directory('lib');
 
     if (!assetsDir.existsSync()) {
-      throw Exception('Carpeta assets/ no encontrada.');
+      throw Exception('assets/ folder not found.');
     }
 
     if (!pubspec.existsSync()) {
-      throw Exception('Archivo pubspec no encontrado.');
+      throw Exception('pubspec file not found.');
     }
     
     if (!libDir.existsSync()) {
-      throw Exception('Carpeta lib/ no encontrada.');
+      throw Exception('lib/ folder not found.');
     }
 
-    // Detectar si existe audioplayers en las dependencias
+    // Detect if audioplayers exists in dependencies
     final hasAudioPlayer = _hasAudioPlayerDependency(pubspec);
     
     final sorter = AssetSorter(assetsDir, excludeAudio: hasAudioPlayer);
@@ -38,10 +38,10 @@ class FlutterOrderAssets {
     final refUpdater = ReferenceUpdater();
     refUpdater.updateReferences(movedPaths);
 
-    print('✅ Proceso completed.');
+    print('✅ Process completed.');
   }
 
-  /// Verifica si existe la dependencia audioplayers en el pubspec.yaml
+  /// Checks if the audioplayers dependency exists in pubspec.yaml
   static bool _hasAudioPlayerDependency(File pubspecFile) {
     final pubspecContent = pubspecFile.readAsStringSync();
     final yaml = loadYaml(pubspecContent);

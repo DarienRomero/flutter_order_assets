@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-/// Esta clase se encarga de organizar los activos en el directorio de assets.
-/// Clasifica los archivos por extensión en carpetas predefinidas (como imágenes, iconos, etc.),
-/// mueve los archivos a sus respectivas carpetas y limpia directorios no válidos o subcarpetas innecesarias.
+/// This class is responsible for organizing assets in the assets directory.
+/// Classifies files by extension into predefined folders (such as images, icons, etc.),
+/// moves files to their respective folders and cleans invalid directories or unnecessary subfolders.
 class AssetSorter {
   final Directory assetsDir;
   final bool excludeAudio;
@@ -30,7 +30,7 @@ class AssetSorter {
     for (final entity in assetsDir.listSync(recursive: true)) {
       if (entity is! File) continue;
 
-      // Si excludeAudio es true y el archivo es de audio en la raíz de assets/, no moverlo
+      // If excludeAudio is true and the file is audio in the root of assets/, don't move it
       if (excludeAudio && _isAudioInAssetsRoot(entity.path)) {
         continue;
       }
@@ -60,11 +60,11 @@ class AssetSorter {
       if (entity is Directory) {
         final folderName = path.basename(entity.path);
 
-        // Si no está en las carpetas válidas → eliminarla
+        // If not in valid folders → delete it
         if (!validFolders.contains(folderName)) {
           entity.deleteSync(recursive: true);
         } else {
-          // Si es válida, borrar subcarpetas dentro de ella
+          // If valid, delete subfolders inside it
           for (final sub in entity.listSync()) {
             if (sub is Directory) {
               sub.deleteSync(recursive: true);
@@ -77,17 +77,17 @@ class AssetSorter {
     return movedPaths;
   }
 
-  /// Verifica si un archivo es de audio y está directamente en assets/ (no en subdirectorios)
+  /// Checks if a file is audio and is directly in assets/ (not in subdirectories)
   bool _isAudioInAssetsRoot(String filePath) {
     final audioExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac'];
     final ext = path.extension(filePath).toLowerCase();
     
     if (!audioExtensions.contains(ext)) return false;
     
-    // Obtener la ruta relativa desde assetsDir
+    // Get the relative path from assetsDir
     final relativePath = path.relative(filePath, from: assetsDir.path);
     
-    // Si no contiene '/', está directamente en assets/
+    // If it doesn't contain '/', it's directly in assets/
     return !relativePath.contains(path.separator);
   }
 }
